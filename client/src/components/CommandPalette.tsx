@@ -1,31 +1,16 @@
 import React from 'react';
-
-const commands = [
-  { type: 'turtle', label: 'Turtle' },
-  { type: 'forward', label: 'Forward' },
-  { type: 'color', label: 'Color' },
-  { type: 'turn-right', label: 'Turn Right' },
-  { type: 'turn-left', label: 'Turn Left' },
-  { type: 'repeat', label: 'Repeat' },
-];
+import './CommandPalette.css';
+import CommandBlock from './CommandBlock';
 
 const CommandPalette: React.FC = () => {
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, commandType: string) => {
-    e.dataTransfer.setData('command', commandType);
-  };
-
   return (
     <div className="command-palette">
-      {commands.map((command) => (
-        <div
-          key={command.type}
-          draggable
-          onDragStart={(e) => handleDragStart(e, command.type)}
-        >
-          <img src={`/images/${command.type}.png`} alt={command.label} />
-          <p>{command.label}</p>
-        </div>
-      ))}
+      <CommandBlock name="Turtle" icon="img/turtle.png" />
+      <CommandBlock name="Forward" icon="img/forward.png" />
+      <CommandBlock name="Color" icon="img/color.png" />
+      <CommandBlock name="Turn Right" icon="img/turn_right.png" />
+      <CommandBlock name="Turn Left" icon="img/turn_left.png" />
+      <CommandBlock name="Repeat" icon="img/repeat.png" />
     </div>
   );
 };

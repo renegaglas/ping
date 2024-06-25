@@ -1,150 +1,66 @@
-.app {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  width: 100vw;
-  background-color: white;
-}
-
-.header {
-  display: flex;
-  justify-content: flex-start;
-  width: 100%;
-  padding: 10px;
-  background-color: green;
-}
-
-.header-button {
-  background-color: black;
-  color: white;
-  padding: 10px;
-  border: none;
-  cursor: pointer;
-  margin-right: 10px;
-}
-
-.tutorial-button:hover .tutorial-list {
-  display: block;
-}
-
-.tutorial-list {
-  display: none;
-  position: absolute;
-  background-color: white;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.tutorial-item {
-  padding: 10px;
-  cursor: pointer;
-  color: black;
-}
-
-.control-buttons {
-  display: flex;
-  justify-content: center;
-  margin: 10px 0;
-}
-
-.control-button {
-  color: white;
-  padding: 10px;
-  margin: 0 5px;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-}
-
-.play {
-  background-color: green;
-}
-
-.pause {
-  background-color: green;
-}
-
-.stop {
-  background-color: red;
-}
-
-.main-content {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  flex: 1;
-  width: 100%;
-}
-
-.drawing-canvas {
-  border: 1px solid #000;
-  background-color: white;
-  flex: 1;
-}
-
-.command-list {
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  background-color: #ccc;
-  width: 200px;
-  border: 1px solid #000;
-}
-
-.command-item {
-  margin: 5px 0;
-  padding: 10px;
-  background-color: white;
-  border: 1px solid #000;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.command-item img {
-  margin-right: 10px;
-}
-
-.command-block-area {
-  border: 1px solid #ccc;
-  width: 50%;
-  height: 400px;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.dropped-command {
-  padding: 5px;
-  margin: 5px;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  position: relative;
-}
-
-.command-palette {
-  width: 200px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.command-palette div {
-  padding: 10px;
-  margin: 5px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: grab;
-}
-
-.command-palette div img {
-  width: 40px;
-  height: 40px;
-}
-
-.command-palette div p {
+/* App.css */
+body {
+  font-family: Arial, sans-serif;
   margin: 0;
-  text-align: center;
+  padding: 0;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+}
+
+#root {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.app-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.canvas-container, .commands-container, .code-container {
+  flex: 1;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.canvas-container {
+  border: 1px solid #ccc;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.commands-container {
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+
+.code-container {
+  border: 1px solid #ccc;
+  background-color: #fefefe;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.control-panel {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.control-panel button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
 }

@@ -1,0 +1,16 @@
+/* CommandBlock.css */
+.command-block {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.command-block img {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
