@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import './App.css';
 import Canvas from './components/Canvas';
 import CommandPalette from './components/CommandPalette';
@@ -35,18 +36,19 @@ const App: React.FC = () => {
   };
 
   const handleTutorialClick = async (tutorial: string) => {
-    const response = await fetch('http://localhost:8080/api/open/file', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ path: tutorial }),
-    });
-
-    if (response.ok) {
-      console.log(`${tutorial} tutorial opened`);
-    } else {
-      console.error('Failed to open tutorial');
+    try {
+        const response = await axios.post(
+        'http://localhost:8080/api/open/file',
+        { path: tutorial },
+        {
+            headers: { 'Content-Type': 'application/json' },
+        }
+        );
+        if (response.data) {
+            window.open(response.data, '_blank');
+        }
+    } catch (error) {
+        console.log("Couldn't open the tutorial", error);
     }
   };
 
@@ -58,9 +60,9 @@ const App: React.FC = () => {
         <div className="tutorials-dropdown">
           <button>Tutorials</button>
           <div className="tutorials-dropdown-content">
-            <button onClick={() => handleTutorialClick('drawing_tutorial')}>Drawing Tutorial</button>
-            <button onClick={() => handleTutorialClick('turn_tutorial')}>Turn Tutorial</button>
-            <button onClick={() => handleTutorialClick('repeat_tutorial')}>Repeat Tutorial</button>
+            <button onClick={() => handleTutorialClick('drawing_tutorial.tsx')}>Drawing Tutorial</button>
+            <button onClick={() => handleTutorialClick('turn_tutorial.tsx')}>Turn Tutorial</button>
+            <button onClick={() => handleTutorialClick('repeat_tutorial.tsx')}>Repeat Tutorial</button>
           </div>
         </div>
       </div>
