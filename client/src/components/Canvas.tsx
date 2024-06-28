@@ -26,7 +26,6 @@ const Canvas: React.FC<CanvasProps> = ({ commands, isDrawing, toggleDrawing, isP
     const canvas = canvasRef.current;
     const context = canvas?.getContext('2d');
     if (context) {
-      context.clearRect(0, 0, context.canvas.width, context.canvas.height);
       drawTurtle(context, turtle.x, turtle.y, turtle.angle);
     }
   }, [turtle]);
@@ -41,6 +40,8 @@ const Canvas: React.FC<CanvasProps> = ({ commands, isDrawing, toggleDrawing, isP
     const canvas = canvasRef.current;
     const context = canvas?.getContext('2d');
     if (context) {
+      let localIsDrawing = isDrawing; // Local drawing state
+
       for (const command of commands) {
         if (!isPlaying || isPaused) break;
 
@@ -49,7 +50,7 @@ const Canvas: React.FC<CanvasProps> = ({ commands, isDrawing, toggleDrawing, isP
             const distance = command.value as number || 0;
             const newX = turtle.x + distance * Math.cos((turtle.angle * Math.PI) / 180);
             const newY = turtle.y + distance * Math.sin((turtle.angle * Math.PI) / 180);
-            if (isDrawing) {
+            if (localIsDrawing) {
               context.beginPath();
               context.moveTo(turtle.x, turtle.y);
               context.lineTo(newX, newY);
@@ -59,21 +60,22 @@ const Canvas: React.FC<CanvasProps> = ({ commands, isDrawing, toggleDrawing, isP
             setTurtle({ ...turtle, x: newX, y: newY });
             break;
           case 'Turtle':
-            toggleDrawing();
+            localIsDrawing = !localIsDrawing;
             break;
           case 'Color':
-            setTurtle({ ...turtle, color: command.value as string });
+            setTurtle(prev => ({ ...prev, color: command.value as string }));
             break;
           case 'Turn Right':
-            setTurtle(prev => ({ ...prev, angle: prev.angle + (command.value as number) }));
+            setTurtle(prev => ({ ...prev, angle: (prev.angle + (command.value as number)) % 360 }));
             break;
           case 'Turn Left':
-            setTurtle(prev => ({ ...prev, angle: prev.angle - (command.value as number) }));
+            setTurtle(prev => ({ ...prev, angle: (prev.angle - (command.value as number) + 360) % 360 }));
             break;
           default:
             break;
         }
         await new Promise(resolve => setTimeout(resolve, 1000));
+        drawTurtle(context, turtle.x, turtle.y, turtle.angle); // Redraw the turtle at the new position
       }
       setIsPlaying(false);
     }
@@ -83,6 +85,7 @@ const Canvas: React.FC<CanvasProps> = ({ commands, isDrawing, toggleDrawing, isP
     const img = new Image();
     img.src = 'img/turtle_canvas.png';
     img.onload = () => {
+      context.clearRect(0, 0, context.canvas.width, context.canvas.height);
       context.save();
       context.translate(x, y);
       context.rotate((angle * Math.PI) / 180);

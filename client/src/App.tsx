@@ -37,20 +37,33 @@ const App: React.FC = () => {
 
   const handleTutorialClick = async (tutorial: string) => {
     try {
-        const response = await axios.post(
+      const response = await axios.post(
         'http://localhost:8080/api/open/file',
         { path: tutorial },
         {
-            headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json' },
         }
-        );
-        if (response.data) {
-            window.open(response.data, '_blank');
-        }
+      );
+      if (response.data) {
+        const blob = new Blob([response.data], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      }
     } catch (error) {
-        console.log("Couldn't open the tutorial", error);
+      console.log("Couldn't open the tutorial", error);
     }
   };
+
+  /*const test_endpoint = async () => {
+    try {
+      const response = await axios.get(
+        'http://localhost:8080/api/hello',
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.log("Couldn't reach the endpoint", error);
+    }
+  };*/
 
   return (
     <>
