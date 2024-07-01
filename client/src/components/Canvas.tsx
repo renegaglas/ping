@@ -18,9 +18,35 @@ interface CanvasProps {
   setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ commands, isDrawing, toggleDrawing, isPlaying, isPaused, handlePlay, handlePause, handleStop, setIsPlaying }) => {
+interface TurtleState {
+  x: number;
+  y: number;
+  angle: number;
+  color: string;
+  isDrawing: boolean;
+}
+
+const initialTurtleState: TurtleState = {
+  x: 250,
+  y: 250,
+  angle: 0,
+  color: 'black',
+  isDrawing: false,
+};
+
+const Canvas: React.FC<CanvasProps> = ({
+  commands,
+  isDrawing,
+  toggleDrawing,
+  isPlaying,
+  isPaused,
+  handlePlay,
+  handlePause,
+  handleStop,
+  setIsPlaying
+}) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [turtle, setTurtle] = useState({ x: 250, y: 250, angle: 0, color: 'black' });
+  const [turtle, setTurtle] = useState<TurtleState>(initialTurtleState);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -28,7 +54,7 @@ const Canvas: React.FC<CanvasProps> = ({ commands, isDrawing, toggleDrawing, isP
     if (context) {
       drawTurtle(context, turtle.x, turtle.y, turtle.angle);
     }
-  }, [turtle]);
+  }, []);
 
   useEffect(() => {
     if (isPlaying && !isPaused) {
@@ -36,56 +62,75 @@ const Canvas: React.FC<CanvasProps> = ({ commands, isDrawing, toggleDrawing, isP
     }
   }, [isPlaying, isPaused]);
 
+  const resetCanvas = () => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext('2d');
+    if (context) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    setTurtle(initialTurtleState);
+  };
+
   const executeCommands = async () => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext('2d');
     if (context) {
-      let localIsDrawing = isDrawing; // Local drawing state
+      resetCanvas();
+      drawTurtle(context, initialTurtleState.x, initialTurtleState.y, initialTurtleState.angle); // Draw initial turtle position
+      // await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for turtle to show
+
+      let currentTurtle = { ...initialTurtleState }; // Start with initial state
 
       for (const command of commands) {
         if (!isPlaying || isPaused) break;
 
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        clearTurtle(context, currentTurtle.x, currentTurtle.y);
         switch (command.name) {
           case 'Forward':
             const distance = command.value as number || 0;
-            const newX = turtle.x + distance * Math.cos((turtle.angle * Math.PI) / 180);
-            const newY = turtle.y + distance * Math.sin((turtle.angle * Math.PI) / 180);
-            if (localIsDrawing) {
+            const newX = currentTurtle.x + distance * Math.cos((currentTurtle.angle * Math.PI) / 180);
+            const newY = currentTurtle.y + distance * Math.sin((currentTurtle.angle * Math.PI) / 180);
+            if (currentTurtle.isDrawing) {
               context.beginPath();
-              context.moveTo(turtle.x, turtle.y);
+              context.moveTo(currentTurtle.x, currentTurtle.y);
               context.lineTo(newX, newY);
-              context.strokeStyle = turtle.color;
+              context.strokeStyle = currentTurtle.color;
               context.stroke();
             }
-            setTurtle({ ...turtle, x: newX, y: newY });
+            currentTurtle.x = newX;
+            currentTurtle.y = newY;
             break;
           case 'Turtle':
-            localIsDrawing = !localIsDrawing;
+            currentTurtle.isDrawing = !currentTurtle.isDrawing;
             break;
           case 'Color':
-            setTurtle(prev => ({ ...prev, color: command.value as string }));
+            currentTurtle.color = command.value as string;
             break;
           case 'Turn Right':
-            setTurtle(prev => ({ ...prev, angle: (prev.angle + (command.value as number)) % 360 }));
+            currentTurtle.angle = (currentTurtle.angle + (command.value as number)) % 360;
             break;
           case 'Turn Left':
-            setTurtle(prev => ({ ...prev, angle: (prev.angle - (command.value as number) + 360) % 360 }));
+            currentTurtle.angle = (currentTurtle.angle - (command.value as number) + 360) % 360;
             break;
           default:
             break;
         }
         await new Promise(resolve => setTimeout(resolve, 1000));
-        drawTurtle(context, turtle.x, turtle.y, turtle.angle); // Redraw the turtle at the new position
+        drawTurtle(context, currentTurtle.x, currentTurtle.y, currentTurtle.angle); // Redraw the turtle at the new position
       }
-      setIsPlaying(false);
+      setTurtle(currentTurtle); // Update the state with the final turtle position
     }
+  };
+
+  const clearTurtle = (context: CanvasRenderingContext2D, x: number, y: number) => {
+    context.clearRect(x - 15, y - 15, 30, 30); // Clear the area where the turtle was previously drawn
   };
 
   const drawTurtle = (context: CanvasRenderingContext2D, x: number, y: number, angle: number) => {
     const img = new Image();
     img.src = 'img/turtle_canvas.png';
     img.onload = () => {
-      context.clearRect(0, 0, context.canvas.width, context.canvas.height);
       context.save();
       context.translate(x, y);
       context.rotate((angle * Math.PI) / 180);
@@ -97,9 +142,15 @@ const Canvas: React.FC<CanvasProps> = ({ commands, isDrawing, toggleDrawing, isP
   return (
     <div className="canvas">
       <div className="control-panel">
-        <button onClick={handlePlay}>Play</button>
-        <button onClick={handlePause}>Pause</button>
-        <button onClick={handleStop}>Stop</button>
+        <button onClick={() => { handlePlay(); }}>
+          <img src="img/play_button.png" alt="Play" />
+        </button>
+        <button onClick={handlePause}>
+          <img src="img/pause_button.png" alt="Pause" />
+        </button>
+        <button onClick={handleStop}>
+          <img src="img/stop_button.png" alt="Stop" />
+        </button>
       </div>
       <canvas ref={canvasRef} id="turtle-canvas" width="500" height="500"></canvas>
     </div>

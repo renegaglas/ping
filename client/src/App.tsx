@@ -45,16 +45,15 @@ const App: React.FC = () => {
         }
       );
       if (response.data) {
-        const blob = new Blob([response.data], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
+        const commandsFromTutorial: Command[] = JSON.parse(response.data);
+        setCommands(commandsFromTutorial);
       }
     } catch (error) {
       console.log("Couldn't open the tutorial", error);
     }
   };
 
-  /*const test_endpoint = async () => {
+  const test_endpoint = async () => {
     try {
       const response = await axios.get(
         'http://localhost:8080/api/hello',
@@ -63,7 +62,7 @@ const App: React.FC = () => {
     } catch (error) {
       console.log("Couldn't reach the endpoint", error);
     }
-  };*/
+  };
 
   return (
     <>
@@ -73,9 +72,9 @@ const App: React.FC = () => {
         <div className="tutorials-dropdown">
           <button>Tutorials</button>
           <div className="tutorials-dropdown-content">
-            <button onClick={() => handleTutorialClick('drawing_tutorial.tsx')}>Drawing Tutorial</button>
-            <button onClick={() => handleTutorialClick('turn_tutorial.tsx')}>Turn Tutorial</button>
-            <button onClick={() => handleTutorialClick('repeat_tutorial.tsx')}>Repeat Tutorial</button>
+            <button onClick={() => handleTutorialClick('drawing_tutorial.json')}>Drawing Tutorial</button>
+            <button onClick={() => handleTutorialClick('turn_tutorial.json')}>Turn Tutorial</button>
+            <button onClick={() => handleTutorialClick('repeat_tutorial.json')}>Repeat Tutorial</button>
           </div>
         </div>
       </div>

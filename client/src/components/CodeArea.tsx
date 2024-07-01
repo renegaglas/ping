@@ -4,6 +4,8 @@ import './CodeArea.css';
 interface Command {
   name: string;
   value?: number | string;
+  color?: string;
+  angle?: number;
 }
 
 interface CodeAreaProps {
@@ -14,21 +16,33 @@ interface CodeAreaProps {
 const CommandIcons: { [key: string]: string } = {
   'Turtle': 'img/turtle.png',
   'Forward': 'img/forward.png',
-  'Color': 'img/color.png',
+  'Color': 'img/color_black.png',
   'Turn Right': 'img/turn_right.png',
   'Turn Left': 'img/turn_left.png',
   'Repeat': 'img/repeat.png'
 };
 
-const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black'];
+const Colorfiles: { [key: string]: string } = {
+  'black': 'img/color_black.png',
+  'pink': 'img/color_pink.png',
+  'purple': 'img/color_purple.png',
+  'blue': 'img/color_blue.png',
+  'green': 'img/color_green.png',
+  'yellow': 'img/color_yellow.png',
+  'orange': 'img/color_orange.png',
+  'red': 'img/color_red.png',
+};
+
+const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'black'];
 
 const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
   const [currentCommand, setCurrentCommand] = useState<Command | null>(null);
   const [currentAngle, setCurrentAngle] = useState(0);
+  const [currentColor, setCurrentColor] = useState<string>('black'); // Default color
 
   const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
     const commandName = event.dataTransfer.getData('command');
-    setCurrentCommand({ name: commandName });
+    setCurrentCommand({ name: commandName, color: 'black', angle: 0 });
     event.preventDefault();
   };
 
@@ -41,6 +55,7 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
       setCommands([...commands, currentCommand]);
       setCurrentCommand(null);
       setCurrentAngle(0);
+      setCurrentColor('black');
     }
   };
 
@@ -48,7 +63,14 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     const roundedAngle = Math.round(angle);
     setCurrentAngle(roundedAngle);
     if (currentCommand) {
-      setCurrentCommand({ ...currentCommand, value: roundedAngle });
+      setCurrentCommand({ ...currentCommand, value: roundedAngle, angle: roundedAngle });
+    }
+  };
+
+  const handleColorSelection = (color: string) => {
+    setCurrentColor(color);
+    if (currentCommand) {
+      setCurrentCommand({ ...currentCommand, value: color, color: color });
     }
   };
 
@@ -68,17 +90,23 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
         {commands.map((command, index) => (
           <React.Fragment key={index}>
             <div className="dropped-command">
-              <img src={CommandIcons[command.name]} alt={command.name} />
+              <img
+                src={command.name === 'Color' ? Colorfiles[command.color || 'black'] : CommandIcons[command.name]}
+                alt={command.name}
+              />
               {command.value && <span>{command.value}</span>}
             </div>
             {index < commands.length - 1 && (
-              <div className="arrow">&#8595;</div> // Unicode for down arrow
+              <div className="arrow">&#8595;</div>
             )}
           </React.Fragment>
         ))}
         {currentCommand && (
           <div className="command-input">
-            <img src={CommandIcons[currentCommand.name]} alt={currentCommand.name} />
+            <img
+              src={currentCommand.name === 'Color' ? Colorfiles[currentColor] : CommandIcons[currentCommand.name]}
+              alt={currentCommand.name}
+            />
             {currentCommand.name === 'Forward' && (
               <input
                 type="number"
@@ -92,7 +120,7 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
                     key={color}
                     className="color-swatch"
                     style={{ backgroundColor: color }}
-                    onClick={() => setCurrentCommand({ ...currentCommand, value: color })}
+                    onClick={() => handleColorSelection(color)}
                   />
                 ))}
               </div>
