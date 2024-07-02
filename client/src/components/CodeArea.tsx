@@ -125,20 +125,33 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
                 ))}
               </div>
             )}
+
+
             {(currentCommand.name === 'Turn Right' || currentCommand.name === 'Turn Left') && (
-              <div className="angle-input">
-                <div
-                  className="turtle-icon"
-                  onMouseMove={handleDrag}
-                  onMouseDown={(e) => e.preventDefault()}
-                  style={{ transform: `rotate(${currentAngle}deg)` }}
-                >
-                  <img src="img/turtle_canvas.png" alt="turtle" />
-                  <div className="rotation-handle"></div>
-                </div>
-                <span>{currentAngle}°</span>
+            <div className="angle-input">
+              <div
+                className="turtle-icon"
+                onMouseMove={handleDrag}
+                onMouseDown={(e) => e.preventDefault()}
+                style={{ transform: `rotate(${currentCommand.value}deg)` }}
+              >
+                <img src="img/turtle_canvas.png" alt="turtle" />
+                <div className="rotation-handle"></div>
               </div>
+              <input
+                type="number"
+                value={currentCommand.value}
+                onChange={(e) =>
+                  {
+                  let value = parseInt(e.target.value);
+                  if (value < -180) value = -180;
+                  if (value > 180) value = 180;
+                  setCurrentCommand({ ...currentCommand, value: value})
+                }}
+              />
+            </div>
             )}
+
             <button onClick={handleConfirm}>Confirm</button>
           </div>
         )}
