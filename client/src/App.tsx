@@ -6,6 +6,7 @@ import CommandPalette from './components/CommandPalette';
 import CodeArea from './components/CodeArea';
 
 interface Command {
+  index: number;
   name: string;
   value?: number | string;
 }

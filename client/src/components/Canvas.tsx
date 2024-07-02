@@ -2,8 +2,10 @@ import React, { useRef, useEffect, useState } from 'react';
 import './Canvas.css';
 
 interface Command {
+  index: number;
   name: string;
   value?: number | string;
+  closed?: boolean;
 }
 
 interface CanvasProps {
@@ -71,16 +73,7 @@ const Canvas: React.FC<CanvasProps> = ({
     setTurtle(initialTurtleState);
   };
 
-  const executeCommands = async () => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext('2d');
-    if (context) {
-      resetCanvas();
-      drawTurtle(context, initialTurtleState.x, initialTurtleState.y, initialTurtleState.angle); // Draw initial turtle position
-      // await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for turtle to show
-
-      let currentTurtle = { ...initialTurtleState }; // Start with initial state
-
+  const executeCommandsList = async (commands: Command[], context: CanvasRenderingContext2D, currentTurtle: TurtleState) => {
       for (const command of commands) {
         if (!isPlaying || isPaused) break;
 
@@ -113,12 +106,37 @@ const Canvas: React.FC<CanvasProps> = ({
           case 'Turn Left':
             currentTurtle.angle = (currentTurtle.angle - (command.value as number) + 360) % 360;
             break;
+          case 'Repeat Start':
+            let loop_instructions = [];
+            for (let i = command.index + 1; i < commands.length; i++) {
+              if (commands[i].name === 'Repeat End' && commands[i].value === command.index) {
+                break;
+              }
+              loop_instructions.push(commands[i]);
+            }
+            for (let i = 0; i < (command.value as number) - 1; i++) {
+              context = await executeCommandsList(loop_instructions, context, currentTurtle);
+            }
+            break;
           default:
             break;
         }
         await new Promise(resolve => setTimeout(resolve, 1000));
         drawTurtle(context, currentTurtle.x, currentTurtle.y, currentTurtle.angle); // Redraw the turtle at the new position
       }
+      return context;
+  };
+
+  const executeCommands = async () => {
+    const canvas = canvasRef.current;
+    let context = canvas?.getContext('2d');
+    if (context) {
+      resetCanvas();
+      drawTurtle(context, initialTurtleState.x, initialTurtleState.y, initialTurtleState.angle); // Draw initial turtle position
+      // await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for turtle to show
+
+      let currentTurtle = { ...initialTurtleState }; // Start with initial state
+      context = await executeCommandsList(commands, context, currentTurtle);
       setTurtle(currentTurtle); // Update the state with the final turtle position
     }
   };

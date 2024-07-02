@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import './CodeArea.css';
 
 interface Command {
+  index: number;
   name: string;
   value?: number | string;
   color?: string;
   angle?: number;
+  closed?: boolean;
 }
 
 interface CodeAreaProps {
@@ -43,7 +45,17 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
 
   const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
     const commandName = event.dataTransfer.getData('command');
-    setCurrentCommand({ name: commandName, color: 'black', angle: 0 });
+    let new_command: Command = { index: commands.length, name: commandName, color: 'black', angle: 0 , closed: false};
+    if (commandName === 'Repeat End') {
+      for (let i = commands.length - 1; i >= 0; i--) {
+        if (commands[i].name === 'Repeat Start' && !commands[i].closed) {
+          commands[i].closed = true;
+          new_command.value = i;
+          break;
+        }
+      }
+    }
+    setCurrentCommand(new_command);
     event.preventDefault();
   };
 
