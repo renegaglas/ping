@@ -81,6 +81,8 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     const deltaX = event.clientX - boundingRect.left - centerX;
     const deltaY = event.clientY - boundingRect.top - centerY;
     const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+
+    console.log('angle is set to', angle, "by handleDrag");
     handleAngleChange(angle);
   };
 
@@ -90,11 +92,12 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
         {commands.map((command, index) => (
           <React.Fragment key={index}>
             <div className="dropped-command">
+              {command.name && <span>{command.name}</span>}
               <img
                 src={command.name === 'Color' ? Colorfiles[command.color || 'black'] : CommandIcons[command.name]}
                 alt={command.name}
               />
-              {command.value && <span>{command.value}</span>}
+              {command.value && <div><span>value = {command.value}</span><br /></div>}
             </div>
             {index < commands.length - 1 && (
               <div className="arrow">&#8595;</div>
@@ -133,20 +136,22 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
                 className="turtle-icon"
                 onMouseMove={handleDrag}
                 onMouseDown={(e) => e.preventDefault()}
-                style={{ transform: `rotate(${currentCommand.value}deg)` }}
+                style={{ transform: `rotate(${currentCommand.angle}deg)` }}
               >
                 <img src="img/turtle_canvas.png" alt="turtle" />
                 <div className="rotation-handle"></div>
               </div>
               <input
                 type="number"
-                value={currentCommand.value}
+                value={currentCommand.angle}
                 onChange={(e) =>
                   {
-                  let value = parseInt(e.target.value);
-                  if (value < -180) value = -180;
-                  if (value > 180) value = 180;
-                  setCurrentCommand({ ...currentCommand, value: value})
+                  let angle_tmp = parseInt(e.target.value);
+                  if (angle_tmp < -180) angle_tmp = -180;
+                  if (angle_tmp > 180) angle_tmp = 180;
+                  console.log('angle is set to', angle_tmp, "by input field");
+
+                  handleAngleChange(angle_tmp);
                 }}
               />
             </div>
