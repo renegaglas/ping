@@ -40,9 +40,17 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
   const [currentAngle, setCurrentAngle] = useState(0);
   const [currentColor, setCurrentColor] = useState<string>('black'); // Default color
 
-  const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
+  const onDrop = (event: React.DragEvent<HTMLDivElement>,index:number) => {
+
+    console.log('on drop start');
+    console.log('index set to', index);
+    console.log('event is set to', event);
+
     const commandName = event.dataTransfer.getData('command');
-    setCurrentCommand({ name: commandName, color: 'black', angle: 0 });
+
+    console.log('commands is set to', commands);
+    commands.splice(index, 0, { name: commandName, color: 'black', angle: 0 });
+    console.log('commands is set to', commands);
     event.preventDefault();
   };
 
@@ -86,37 +94,29 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     handleAngleChange(angle);
   };
 
+  const test = (id:string) => {
+    console.log("the function test " + id + " has been called");
+  };
+
   return (
-    <div className="code-area" onDrop={onDrop} onDragOver={onDragOver}>
+    <div className="code-area" onDrop={(e) => onDrop(e, commands.length)} onDragOver={onDragOver}>
       <div className="code-area-content">
         {commands.map((command, index) => (
           <React.Fragment key={index}>
+            <p color='black'>testing</p>
             <div className="dropped-command">
-              {command.name && <span>{command.name}</span>}
-              <img
-                src={command.name === 'Color' ? Colorfiles[command.color || 'black'] : CommandIcons[command.name]}
-                alt={command.name}
-              />
-              {command.value && <div><span>value = {command.value}</span><br /></div>}
-            </div>
-            {index < commands.length - 1 && (
-              <div className="arrow">&#8595;</div>
-            )}
-          </React.Fragment>
-        ))}
-        {currentCommand && (
-          <div className="command-input">
+
             <img
-              src={currentCommand.name === 'Color' ? Colorfiles[currentColor] : CommandIcons[currentCommand.name]}
-              alt={currentCommand.name}
+              src={command.name === 'Color' ? Colorfiles[currentColor] : CommandIcons[command.name]}
+              alt={command.name}
             />
-            {currentCommand.name === 'Forward' && (
+            {command.name === 'Forward' && (
               <input
                 type="number"
-                onChange={(e) => setCurrentCommand({ ...currentCommand, value: parseInt(e.target.value) })}
+                onChange={(e) => setCurrentCommand({ ...command, value: parseInt(e.target.value) })}
               />
             )}
-            {currentCommand.name === 'Color' && (
+            {command.name === 'Color' && (
               <div className="color-palette">
                 {colors.map((color) => (
                   <div
@@ -129,21 +129,20 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
               </div>
             )}
 
-
-            {(currentCommand.name === 'Turn Right' || currentCommand.name === 'Turn Left') && (
+          {(command.name === 'Turn Right' || command.name === 'Turn Left') && (
             <div className="angle-input">
               <div
                 className="turtle-icon"
                 onMouseMove={handleDrag}
                 onMouseDown={(e) => e.preventDefault()}
-                style={{ transform: `rotate(${currentCommand.angle}deg)` }}
+                style={{ transform: `rotate(${command.angle}deg)` }}
               >
                 <img src="img/turtle_canvas.png" alt="turtle" />
                 <div className="rotation-handle"></div>
               </div>
               <input
                 type="number"
-                value={currentCommand.angle}
+                value={command.angle}
                 onChange={(e) =>
                   {
                   let angle_tmp = parseInt(e.target.value);
@@ -157,9 +156,16 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
             </div>
             )}
 
-            <button onClick={handleConfirm}>Confirm</button>
-          </div>
-        )}
+
+
+
+
+            </div>
+            {index < commands.length - 1 && (
+              <div className="arrow" onDrop={(e) => onDrop(e, index)} onDragOver={onDragOver}>&#8595;</div>
+            )}
+          </React.Fragment>
+        ))}
       </div>
     </div>
   );
