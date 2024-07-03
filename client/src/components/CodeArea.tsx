@@ -112,6 +112,12 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     setCommands(updatedCommands);
   };
 
+  const handleRepeatSelection = (n: number,index:number) => {
+    const updatedCommands = [...commands];
+    updatedCommands[index].value = n;
+    setCommands(updatedCommands);
+  };
+
   const handleDrag = (event: React.MouseEvent<HTMLDivElement, MouseEvent>,index:number) => {
     const boundingRect = event.currentTarget.getBoundingClientRect();
     const centerX = boundingRect.width / 2;
@@ -143,15 +149,18 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
       <div className="arrow" onDrop={(e) => onDrop(e, 0)} onDragOver={onDragOver}>&#8595;</div>
         {commands.map((command, index) => (
           <React.Fragment key={index}>
+
+
+
             <div className="dropped-command">
-              {command.name && <span>{command.name}</span>}
+
+            {command.name && <span>{command.name}</span>}
               <img
                 src={command.name === 'Color' ? Colorfiles[command.color || 'black'] : CommandIcons[command.name]}
                 alt={command.name}
               />
               {command.value && <div><span>value = {command.value}</span><br /></div>}
-            </div>
-        ))}
+
             {command.name === 'Forward' && (
               <input
                 type="number"
@@ -159,17 +168,16 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
                 onChange={(e) =>  handleDistnaceSelection(parseInt(e.target.value),index)}
               />
             )}
-            {currentCommand.name === 'Repeat Start' && (
+            {command.name === 'Repeat Start' && (
               <input
                 type="number"
                 min="1"
                 onChange={(e) => {
                   if (parseInt(e.target.value) < 1) e.target.value = '1';
-                  setCurrentCommand({ ...currentCommand, value: parseInt(e.target.value) })
+                  handleRepeatSelection(parseInt(e.target.value),index)
                 }}
               />
             )}
-            {currentCommand.name === 'Color' && (
             {command.name === 'Color' && (
               <div className="color-palette">
                 {colors.map((color) => (
