@@ -14,23 +14,6 @@ interface Command {
 const App: React.FC = () => {
   const [commands, setCommands] = useState<Command[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-
-  const handlePlay = () => {
-    setIsPlaying(true);
-    setIsPaused(false);
-  };
-
-  const handlePause = () => {
-    setIsPaused(true);
-  };
-
-  const handleStop = () => {
-    setIsPlaying(false);
-    setIsPaused(false);
-    setCommands([]); // Reset commands if needed
-  };
 
   const toggleDrawing = () => {
     setIsDrawing(prev => !prev);
@@ -85,12 +68,6 @@ const App: React.FC = () => {
             commands={commands} 
             isDrawing={isDrawing} 
             toggleDrawing={toggleDrawing} 
-            isPlaying={isPlaying} 
-            isPaused={isPaused} 
-            handlePlay={handlePlay} 
-            handlePause={handlePause} 
-            handleStop={handleStop} 
-            setIsPlaying={setIsPlaying}
           />
         </div>
         <div className="code-container">

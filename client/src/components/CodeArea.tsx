@@ -45,6 +45,13 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
 
   const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
     const commandName = event.dataTransfer.getData('command');
+    //console.log("commandName",commandName);
+    if (!commandName)
+      {
+        //console.log("abord onDrop");
+        event.preventDefault();
+        return;
+      }
     let new_command: Command = { index: commands.length, name: commandName, color: 'black', angle: 0 , closed: false};
     if (commandName === 'Repeat End') {
       for (let i = commands.length - 1; i >= 0; i--) {
@@ -101,6 +108,7 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
 
   return (
     <div className="code-area" onDrop={onDrop} onDragOver={onDragOver}>
+      <button className="cleat button" onClick={() => setCommands([])}>Clear</button>
       <div className="code-area-content">
         {commands.map((command, index) => (
           <React.Fragment key={index}>

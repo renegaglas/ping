@@ -2,6 +2,9 @@ import React from 'react';
 import './CommandPalette.css';
 import CommandBlock from './CommandBlock';
 
+
+
+
 const CommandPalette: React.FC = () => {
   return (
     <div className="command-palette">
