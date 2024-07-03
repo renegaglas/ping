@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import './CodeArea.css';
 
 interface Command {
+  index: number;
   name: string;
   value?: number | string;
   color?: string;
   angle?: number;
+  closed?: boolean;
 }
 
 interface CodeAreaProps {
@@ -19,7 +21,8 @@ const CommandIcons: { [key: string]: string } = {
   'Color': 'img/color_black.png',
   'Turn Right': 'img/turn_right.png',
   'Turn Left': 'img/turn_left.png',
-  'Repeat': 'img/repeat.png'
+  'Repeat Start': 'img/repeat_start.png',
+  'Repeat End': 'img/repeat_end.png'
 };
 
 const Colorfiles: { [key: string]: string } = {
@@ -57,10 +60,27 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     console.log('event is set to', event);
 
     const commandName = event.dataTransfer.getData('command');
+    //console.log("commandName",commandName);
+    if (!commandName)
+      {
+        //console.log("abord onDrop");
+        event.preventDefault();
+        return;
+      }
+    let val_tmp = 0;
+    if (commandName === 'Repeat End') {
+      for (let i = commands.length - 1; i >= 0; i--) {
+        if (commands[i].name === 'Repeat Start' && !commands[i].closed) {
+          commands[i].closed = true;
+          val_tmp = i;
+          break;
+        }
+      }
+    }
 
 
     const updatedCommands = [...commands];
-    updatedCommands.splice(index, 0, { name: commandName, color: 'black', angle: 0, value: 0 });
+    updatedCommands.splice(index, 0, { name: commandName, color: 'black', angle: 0, value: val_tmp, closed :false });
     setCommands(updatedCommands);
 
     console.log('updatedCommands is set to', updatedCommands);
@@ -118,17 +138,20 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
 
   return (
     <div className="code-area" onDrop={(e) => onDrophat(e, commands.length)} onDragOver={onDragOver} onMouseEnter={handleMouseEnter}>
+      <button className="cleat button" onClick={() => setCommands([])}>Clear</button>
       <div className="code-area-content">
       <div className="arrow" onDrop={(e) => onDrop(e, 0)} onDragOver={onDragOver}>&#8595;</div>
         {commands.map((command, index) => (
           <React.Fragment key={index}>
-            <p color='black'>testing</p>
             <div className="dropped-command">
-
-            <img
-              src={command.name === 'Color' ? Colorfiles[command.color || 'black'] : CommandIcons[command.name]}
-              alt={command.name}
-            />
+              {command.name && <span>{command.name}</span>}
+              <img
+                src={command.name === 'Color' ? Colorfiles[command.color || 'black'] : CommandIcons[command.name]}
+                alt={command.name}
+              />
+              {command.value && <div><span>value = {command.value}</span><br /></div>}
+            </div>
+        ))}
             {command.name === 'Forward' && (
               <input
                 type="number"
@@ -136,6 +159,17 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
                 onChange={(e) =>  handleDistnaceSelection(parseInt(e.target.value),index)}
               />
             )}
+            {currentCommand.name === 'Repeat Start' && (
+              <input
+                type="number"
+                min="1"
+                onChange={(e) => {
+                  if (parseInt(e.target.value) < 1) e.target.value = '1';
+                  setCurrentCommand({ ...currentCommand, value: parseInt(e.target.value) })
+                }}
+              />
+            )}
+            {currentCommand.name === 'Color' && (
             {command.name === 'Color' && (
               <div className="color-palette">
                 {colors.map((color) => (
