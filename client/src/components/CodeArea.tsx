@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './CodeArea.css';
 
 interface Command {
@@ -39,11 +39,26 @@ const Colorfiles: { [key: string]: string } = {
 const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'black'];
 
 const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
-  const [currentCommand, setCurrentCommand] = useState<Command | null>(null);
-  const [currentAngle, setCurrentAngle] = useState(0);
-  const [currentColor, setCurrentColor] = useState<string>('black'); // Default color
 
-  const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
+  useEffect(() => {
+    // This effect runs whenever `commands` changes
+    console.log("commands has been modified")
+  }, [commands]);
+
+
+  const onDrophat = (event: React.DragEvent<HTMLDivElement>,index:number) => {
+    console.log("onDrophat has been called and abort")
+    return;
+    onDrop(event, index);
+  }
+
+  const onDrop = (event: React.DragEvent<HTMLDivElement>,index:number) => {
+
+    console.log('on drop start');
+    console.log('commands is set to', commands);
+    console.log('index set to', index);
+    console.log('event is set to', event);
+
     const commandName = event.dataTransfer.getData('command');
     //console.log("commandName",commandName);
     if (!commandName)
@@ -52,17 +67,23 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
         event.preventDefault();
         return;
       }
-    let new_command: Command = { index: commands.length, name: commandName, color: 'black', angle: 0 , closed: false};
+    let val_tmp = 0;
     if (commandName === 'Repeat End') {
       for (let i = commands.length - 1; i >= 0; i--) {
         if (commands[i].name === 'Repeat Start' && !commands[i].closed) {
           commands[i].closed = true;
-          new_command.value = i;
+          val_tmp = i;
           break;
         }
       }
     }
-    setCurrentCommand(new_command);
+
+
+    const updatedCommands = [...commands];
+    updatedCommands.splice(index, 0, { name: commandName, color: 'black', angle: 0, value: val_tmp, closed :false });
+    setCommands(updatedCommands);
+
+    console.log('updatedCommands is set to', updatedCommands);
     event.preventDefault();
   };
 
@@ -70,31 +91,28 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     event.preventDefault();
   };
 
-  const handleConfirm = () => {
-    if (currentCommand) {
-      setCommands([...commands, currentCommand]);
-      setCurrentCommand(null);
-      setCurrentAngle(0);
-      setCurrentColor('black');
-    }
-  };
-
-  const handleAngleChange = (angle: number) => {
+  const handleAngleChange = (angle: number,index:number) => {
     const roundedAngle = Math.round(angle);
-    setCurrentAngle(roundedAngle);
-    if (currentCommand) {
-      setCurrentCommand({ ...currentCommand, value: roundedAngle, angle: roundedAngle });
-    }
+    const updatedCommands = [...commands];
+    updatedCommands[index].angle = roundedAngle;
+    updatedCommands[index].value = roundedAngle;
+    setCommands(updatedCommands);
   };
 
-  const handleColorSelection = (color: string) => {
-    setCurrentColor(color);
-    if (currentCommand) {
-      setCurrentCommand({ ...currentCommand, value: color, color: color });
-    }
+  const handleDistnaceSelection = (d: number,index:number) => {
+    const updatedCommands = [...commands];
+    updatedCommands[index].value = d;
+    setCommands(updatedCommands);
   };
 
-  const handleDrag = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleColorSelection = (color: string,index:number) => {
+    const updatedCommands = [...commands];
+    updatedCommands[index].color = color;
+    updatedCommands[index].value = color;
+    setCommands(updatedCommands);
+  };
+
+  const handleDrag = (event: React.MouseEvent<HTMLDivElement, MouseEvent>,index:number) => {
     const boundingRect = event.currentTarget.getBoundingClientRect();
     const centerX = boundingRect.width / 2;
     const centerY = boundingRect.height / 2;
@@ -103,13 +121,26 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
 
     console.log('angle is set to', angle, "by handleDrag");
-    handleAngleChange(angle);
+    handleAngleChange(angle,index);
   };
 
+  const test = (id:string) => {
+    console.log("the function test " + id + " has been called");
+    console.log(commands);
+    console.log(commands.length);
+  };
+
+  const handleMouseEnter = () => {
+    test("handleMouseEnter");
+  };
+
+
+
   return (
-    <div className="code-area" onDrop={onDrop} onDragOver={onDragOver}>
+    <div className="code-area" onDrop={(e) => onDrophat(e, commands.length)} onDragOver={onDragOver} onMouseEnter={handleMouseEnter}>
       <button className="cleat button" onClick={() => setCommands([])}>Clear</button>
       <div className="code-area-content">
+      <div className="arrow" onDrop={(e) => onDrop(e, 0)} onDragOver={onDragOver}>&#8595;</div>
         {commands.map((command, index) => (
           <React.Fragment key={index}>
             <div className="dropped-command">
@@ -120,21 +151,12 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
               />
               {command.value && <div><span>value = {command.value}</span><br /></div>}
             </div>
-            {index < commands.length - 1 && (
-              <div className="arrow">&#8595;</div>
-            )}
-          </React.Fragment>
         ))}
-        {currentCommand && (
-          <div className="command-input">
-            <img
-              src={currentCommand.name === 'Color' ? Colorfiles[currentColor] : CommandIcons[currentCommand.name]}
-              alt={currentCommand.name}
-            />
-            {currentCommand.name === 'Forward' && (
+            {command.name === 'Forward' && (
               <input
                 type="number"
-                onChange={(e) => setCurrentCommand({ ...currentCommand, value: parseInt(e.target.value) })}
+                value={command.value}
+                onChange={(e) =>  handleDistnaceSelection(parseInt(e.target.value),index)}
               />
             )}
             {currentCommand.name === 'Repeat Start' && (
@@ -148,49 +170,53 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
               />
             )}
             {currentCommand.name === 'Color' && (
+            {command.name === 'Color' && (
               <div className="color-palette">
                 {colors.map((color) => (
                   <div
                     key={color}
                     className="color-swatch"
                     style={{ backgroundColor: color }}
-                    onClick={() => handleColorSelection(color)}
+                    onClick={() => {handleColorSelection(color, index)}}
                   />
                 ))}
               </div>
             )}
 
-
-            {(currentCommand.name === 'Turn Right' || currentCommand.name === 'Turn Left') && (
+          {(command.name === 'Turn Right' || command.name === 'Turn Left') && (
             <div className="angle-input">
               <div
                 className="turtle-icon"
-                onMouseMove={handleDrag}
+                onMouseMove={(e) => handleDrag(e,index)}
                 onMouseDown={(e) => e.preventDefault()}
-                style={{ transform: `rotate(${currentCommand.angle}deg)` }}
+                style={{ transform: `rotate(${command.angle}deg)` }}
               >
                 <img src="img/turtle_canvas.png" alt="turtle" />
                 <div className="rotation-handle"></div>
               </div>
               <input
                 type="number"
-                value={currentCommand.angle}
+                value={command.angle}
                 onChange={(e) =>
                   {
                   let angle_tmp = parseInt(e.target.value);
+                  //if (Number.isNaN(angle_tmp)) angle_tmp = 0;
+                  angle_tmp = Number(angle_tmp);
                   if (angle_tmp < -180) angle_tmp = -180;
-                  if (angle_tmp > 180) angle_tmp = 180;
+                  else if (angle_tmp > 180) angle_tmp = 180;
                   console.log('angle is set to', angle_tmp, "by input field");
 
-                  handleAngleChange(angle_tmp);
+                  handleAngleChange(angle_tmp, index);
                 }}
               />
             </div>
             )}
-
-            <button onClick={handleConfirm}>Confirm</button>
-          </div>
-        )}
+            </div>
+            {index < commands.length  && (
+              <div className="arrow" onDrop={(e) => onDrop(e, index + 1)} onDragOver={onDragOver}>&#8595;</div>
+            )}
+          </React.Fragment>
+        ))}
       </div>
     </div>
   );
