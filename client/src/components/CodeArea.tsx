@@ -154,6 +154,25 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     event.dataTransfer.setData('index', index.toString());
   };
 
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = () => {
+    console.log("handleMouseEnter");
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    console.log("handleMouseLeave");
+    setIsHovered(false);
+  };
+
+  const erase = (index:number) => {
+    const updatedCommands = [...commands];
+    updatedCommands.splice(index, 1);
+    setCommands(updatedCommands);
+
+  }
+
   return (
     <div className="code-area" onDrop={(e) => onDrophat(e, commands.length)} onDragOver={onDragOver} >
       <button className="cleat button" onClick={() => setCommands([])}>Clear</button>
@@ -164,7 +183,13 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
 
 
 
-            <div className="dropped-command" draggable onDragStart={(e) => onDragStart(e,index,command.name)}>
+            <div className="dropped-command" draggable onDragStart={(e) => onDragStart(e,index,command.name)}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}>{isHovered && (
+              <div style={{position: 'absolute', top: '0px', right: '0px', fontSize: '14px', color: 'blue' }} onClick={() => erase(index)}>
+                &#10060;
+              </div>
+            )}
 
             {command.name && <span>{command.name}</span>}
               <img
