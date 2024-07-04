@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './CodeArea.css';
 
 interface Command {
-  index: number;
+  index?: number;
   name: string;
   value?: number | string;
   color?: string;
@@ -81,6 +81,18 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
 
     const updatedCommands = [...commands];
     updatedCommands.splice(index, 0, { name: commandName, color: 'black', angle: 0, value: val_tmp, closed :false });
+
+    const lastindex_tmp = event.dataTransfer.getData('index');
+    if (lastindex_tmp)
+      {
+        let lastindex = parseInt(lastindex_tmp);
+        if (index < lastindex)
+          {
+            lastindex += 1;
+          }
+          updatedCommands.splice(lastindex, 1);
+      }
+
     setCommands(updatedCommands);
 
     console.log('updatedCommands is set to', updatedCommands);
@@ -99,7 +111,7 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     setCommands(updatedCommands);
   };
 
-  const handleDistnaceSelection = (d: number,index:number) => {
+  const handleDistanceSelection = (d: number,index:number) => {
     const updatedCommands = [...commands];
     updatedCommands[index].value = d;
     setCommands(updatedCommands);
@@ -136,14 +148,14 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     console.log(commands.length);
   };
 
-  const handleMouseEnter = () => {
-    test("handleMouseEnter");
+  const onDragStart = (event: React.DragEvent<HTMLDivElement>,index:number,name:string) => {
+
+    event.dataTransfer.setData('command', name);
+    event.dataTransfer.setData('index', index.toString());
   };
 
-
-
   return (
-    <div className="code-area" onDrop={(e) => onDrophat(e, commands.length)} onDragOver={onDragOver} onMouseEnter={handleMouseEnter}>
+    <div className="code-area" onDrop={(e) => onDrophat(e, commands.length)} onDragOver={onDragOver} >
       <button className="cleat button" onClick={() => setCommands([])}>Clear</button>
       <div className="code-area-content">
       <div className="arrow" onDrop={(e) => onDrop(e, 0)} onDragOver={onDragOver}>&#8595;</div>
@@ -152,7 +164,7 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
 
 
 
-            <div className="dropped-command">
+            <div className="dropped-command" draggable onDragStart={(e) => onDragStart(e,index,command.name)}>
 
             {command.name && <span>{command.name}</span>}
               <img
@@ -165,7 +177,7 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
               <input
                 type="number"
                 value={command.value}
-                onChange={(e) =>  handleDistnaceSelection(parseInt(e.target.value),index)}
+                onChange={(e) =>  handleDistanceSelection(parseInt(e.target.value),index)}
               />
             )}
             {command.name === 'Repeat Start' && (
