@@ -209,6 +209,7 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
               <input
                 type="number"
                 min="1"
+                value={command.value}
                 onChange={(e) => {
                   if (parseInt(e.target.value) < 1) e.target.value = '1';
                   handleRepeatSelection(parseInt(e.target.value),index)

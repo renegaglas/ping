@@ -72,10 +72,10 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
 
       const command = commands[i];
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      clearTurtle(context, currentTurtle.x, currentTurtle.y);
       switch (command.name) {
         case 'Forward':
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          clearTurtle(context, currentTurtle.x, currentTurtle.y);
           const distance = (command.value as number) || 0;
           const newX =
             currentTurtle.x +
@@ -92,6 +92,8 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
           }
           currentTurtle.x = newX;
           currentTurtle.y = newY;
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          drawTurtle(context, currentTurtle.x, currentTurtle.y, currentTurtle.angle);
           break;
         case 'Turtle':
           currentTurtle.isDrawing = !currentTurtle.isDrawing;
@@ -126,8 +128,6 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
         default:
           break;
       }
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      drawTurtle(context, currentTurtle.x, currentTurtle.y, currentTurtle.angle);
     }
     return drawingcontext;
   };
@@ -155,6 +155,8 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
         drawingcontext,
         currentTurtle
       );
+      isPlayingRef.current = false;
+      setStart(0);
       setTurtle(currentTurtle);
     }
   };
@@ -180,12 +182,10 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
       <div className="control-panel">
         <button
           onClick={() => {
-            if (start === 0) {
-              isPlayingRef.current = true;
+            if (!isPlayingRef.current) {
               executeCommands();
-            } else {
-              isPlayingRef.current = true;
             }
+            isPlayingRef.current = true;
           }}
         >
           <img src="img/play_button.png" alt="Play" />
