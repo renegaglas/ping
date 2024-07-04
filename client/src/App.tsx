@@ -17,6 +17,10 @@ const App: React.FC = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
+  const [inputValue, setInputValue] = useState<string>('');
+  const [isInputVisible, setIsInputVisible] = useState<boolean>(false);
+  const [currentFeature, setCurrentFeature] = useState<string>('save');
+
 
   const toggleDrawing = () => {
     setIsDrawing(prev => !prev);
@@ -50,10 +54,68 @@ const App: React.FC = () => {
     }
   };
 
+
   const handleClosePopup = () => {
     setIsPopupOpen(false);
   };
 
+  const handleSaveClick = async (input: string) => {
+    const request_content = {
+      name: input,
+      commands: JSON.stringify(commands),
+    }
+    try {
+      const response = await axios.post(
+        'http://localhost:8080/api/save',
+        { body: request_content },
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+      if (response.data) {
+        console.log('File saved successfully');
+      }
+    } catch (error) {
+      console.log("Couldn't save the file", error);
+    }
+  };
+
+  const handleLoadClick = async (input: string) => {
+    try {
+      const response = await axios.post(
+        'http://localhost:8080/api/load',
+        { branch: input },
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+      if (response.data) {
+        const commandsFromTutorial: Command[] = JSON.parse(response.data);
+        setCommands(commandsFromTutorial);
+      }
+    } catch (error) {
+      console.log("Couldn't load the file", error);
+    }
+  };
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
+  };
+
+  const handleButtonClick = () => {
+    setIsInputVisible(true);
+  };
+
+  const handleSubmitClick = (feature: string) => {
+    if (feature === 'save') {
+      handleSaveClick(inputValue);
+      setInputValue('');
+    } else if (feature === 'load') {
+      handleLoadClick(inputValue);
+      setInputValue('');
+    }
+    setIsInputVisible(false); // Hide the input field after submission
+  };
 
   const test_endpoint = async () => {
     try {
@@ -69,8 +131,27 @@ const App: React.FC = () => {
   return (
     <>
       <div className="header">
-        <button>Load</button>
-        <button>Save</button>
+         {isInputVisible && (
+        <div>
+          <input
+            type="text"
+            value={inputValue}
+            onChange={handleInputChange}
+            placeholder="Enter the name of the file"
+          />
+          <button onClick={() => handleSubmitClick(currentFeature)}>Submit</button>
+        </div>
+         )}
+        <button onClick={() => {
+          setCurrentFeature('load');
+          handleButtonClick();
+          }}
+        >Load</button>
+        <button onClick={() => {
+          setCurrentFeature('save');
+          handleButtonClick();
+          }}
+        >Save</button>
         <div className="tutorials-dropdown">
           <button>Tutorials</button>
           <div className="tutorials-dropdown-content">
