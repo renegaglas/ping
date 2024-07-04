@@ -67,7 +67,7 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
     for (let i = start; i < commands.length; i++) {
       if (!isPlayingRef.current) {
         setStart(i);
-        break;
+        return null;
       }
 
       const command = commands[i];
@@ -102,11 +102,19 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
           currentTurtle.color = command.value as string;
           break;
         case 'Turn Right':
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          clearTurtle(context, currentTurtle.x, currentTurtle.y);
           currentTurtle.angle = (currentTurtle.angle + (command.value as number)) % 360;
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          drawTurtle(context, currentTurtle.x, currentTurtle.y, currentTurtle.angle);
           break;
         case 'Turn Left':
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          clearTurtle(context, currentTurtle.x, currentTurtle.y);
           currentTurtle.angle =
             (currentTurtle.angle - (command.value as number) + 360) % 360;
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          drawTurtle(context, currentTurtle.x, currentTurtle.y, currentTurtle.angle);
           break;
         case 'Repeat Start':
           let loop_instructions = [];
@@ -117,12 +125,18 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
             loop_instructions.push(commands[j]);
           }
           for (let k = 0; k < (command.value as number) - 1; k++) {
-            drawingcontext = await executeCommandsList(
+            let tmp = await executeCommandsList(
               loop_instructions,
               context,
               drawingcontext,
               currentTurtle
             );
+            if (!tmp)
+              {
+                return;
+              }
+            drawingcontext = tmp;
+
           }
           break;
         default:
@@ -149,12 +163,16 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
       }
       let currentTurtle = { ...turtle };
       isPlayingRef.current = true;
-      drawingcontext = await executeCommandsList(
+      x = await executeCommandsList(
         commands,
         context,
         drawingcontext,
         currentTurtle
       );
+      if (!drawingcontext)
+        {
+          return;
+        }
       isPlayingRef.current = false;
       setStart(0);
       setTurtle(currentTurtle);
@@ -183,9 +201,9 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
         <button
           onClick={() => {
             if (!isPlayingRef.current) {
+              isPlayingRef.current = true;
               executeCommands();
             }
-            isPlayingRef.current = true;
           }}
         >
           <img src="img/play_button.png" alt="Play" />
