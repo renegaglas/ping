@@ -78,9 +78,50 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
       }
     }
 
+    // taking the rest of the attributes from the dragged command (if they exist)
+    let myColor : string = event.dataTransfer.getData('color');
+    let myAngle : string | number = event.dataTransfer.getData('angle');
+    let myValue : string | number = event.dataTransfer.getData('value');
+    let myClosed : string | boolean = event.dataTransfer.getData('closed');
 
+    // checking if the attributes are valid
+    if (myColor === "undefined") {
+      myColor = 'black';
+    }
+    
+    if (myAngle === "undefined") {
+      myAngle = 0;
+    }
+    else {
+      myAngle = parseInt(myAngle);
+    }
+
+    if (myValue === "undefined") {
+      myValue = val_tmp;
+    }
+    else {
+      // we need to determine if myValue is a string or a number
+      // it's purely a string only if it's a color
+      
+      // if myValue is NOT in colors array (array of strings with all colors)
+      if (colors.find((elt) => {return elt === myValue}) === undefined) {
+        // myValue was not found in colors so it's not a color
+        myValue = parseInt(myValue);
+      }
+    }
+
+    if (myClosed === "undefined") {
+      myClosed = false;
+    }
+    else if (myClosed === "true") {
+      myClosed = true;
+    }
+    else {
+      myClosed = false;
+    }
+    
     const updatedCommands = [...commands];
-    updatedCommands.splice(index, 0, { name: commandName, color: 'black', angle: 0, value: val_tmp, closed :false });
+    updatedCommands.splice(index, 0, { name: commandName, color: myColor, angle: myAngle, value: myValue, closed : myClosed });
 
     const lastindex_tmp = event.dataTransfer.getData('index');
     if (lastindex_tmp)
@@ -148,10 +189,41 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     console.log(commands.length);
   };
 
-  const onDragStart = (event: React.DragEvent<HTMLDivElement>,index:number,name:string) => {
+  const onDragStart = (event: React.DragEvent<HTMLDivElement>,index:number,name:string, angle: number | undefined,
+    closed:boolean | undefined, value:number | string | undefined, color:string | undefined) => {
 
     event.dataTransfer.setData('command', name);
     event.dataTransfer.setData('index', index.toString());
+
+    // checking all the possible undefined attributes
+    // in that case, we set the Data to the string 'undefined'
+    if (typeof angle === 'undefined') {
+      event.dataTransfer.setData('angle', 'undefined');
+    }
+    else{
+      event.dataTransfer.setData('angle', angle.toString());
+    }
+
+    if (typeof closed === 'undefined') {
+      event.dataTransfer.setData('closed', 'undefined');
+    }
+    else {
+      event.dataTransfer.setData('closed', closed.toString());
+    }
+
+    if (typeof value === 'undefined') {
+      event.dataTransfer.setData('value', 'undefined');
+    }
+    else {
+      event.dataTransfer.setData('value', value.toString());
+    }
+
+    if (typeof color === 'undefined') {
+      event.dataTransfer.setData('color', 'undefined');
+    }
+    else {
+      event.dataTransfer.setData('color', color.toString());
+    }
   };
 
   const [isHovered, setIsHovered] = useState(false);
@@ -183,7 +255,7 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
 
 
 
-            <div className="dropped-command" draggable onDragStart={(e) => onDragStart(e,index,command.name)}
+            <div className="dropped-command" draggable onDragStart={(e) => onDragStart(e,index,command.name, command.angle, command.closed, command.value, command.color)}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}>{isHovered && (
               <div style={{position: 'absolute', top: '0px', right: '0px', fontSize: '14px', color: 'blue' }} onClick={() => erase(index)}>
