@@ -36,7 +36,7 @@ const CommandBlock: React.FC<CommandBlockProps> = ({ name, icon }) => {
 
   return (
     <div className="command-block" draggable onDragStart={onDragStart}
-      onMouseEnter={handleMouseEnter}
+      onClick={handleMouseEnter}
       onMouseLeave={handleMouseLeave}>
       <img src={icon} alt={name} />
       <span>{name}</span>
