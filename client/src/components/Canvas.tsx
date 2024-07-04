@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import './Canvas.css';
 
 interface Command {
-  index: number;
+  index?: number;
   name: string;
   value?: number | string;
   closed?: boolean;
@@ -163,7 +163,7 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
       }
       let currentTurtle = { ...turtle };
       isPlayingRef.current = true;
-      x = await executeCommandsList(
+      let x = await executeCommandsList(
         commands,
         context,
         drawingcontext,

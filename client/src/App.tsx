@@ -4,9 +4,10 @@ import './App.css';
 import Canvas from './components/Canvas';
 import CommandPalette from './components/CommandPalette';
 import CodeArea from './components/CodeArea';
+import Popup from './components/Popup';
 
 interface Command {
-  index: number;
+  index?: number;
   name: string;
   value?: number | string;
 }
@@ -14,6 +15,8 @@ interface Command {
 const App: React.FC = () => {
   const [commands, setCommands] = useState<Command[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
 
   const toggleDrawing = () => {
     setIsDrawing(prev => !prev);
@@ -29,13 +32,28 @@ const App: React.FC = () => {
         }
       );
       if (response.data) {
-        const commandsFromTutorial: Command[] = JSON.parse(response.data);
+        const commandsFromTutorial: Command[] = response.data;
         setCommands(commandsFromTutorial);
+        if (tutorial === 'drawing_tutorial.json') {
+          setPopupMessage('Using the forward command, you can make the turtle move forward. And you can draw lines in multiple colors by coupling that with the turtle command that toggles on and off the drawing, and the color command that allows you to pick a color. Try it out!');
+          setIsPopupOpen(true);
+        } else if (tutorial === 'turn_tutorial.json') {
+          setPopupMessage("The turtle isn't obliged to move forward all the time. You can also make it turn right or left to draw even more complex forms. Try it out!");
+          setIsPopupOpen(true);
+        } else if (tutorial === 'repeat_tutorial.json') {
+          setPopupMessage("When writing code, using loops is very useful. The repeat commands allow you to repeat a set of commands multiple times, and so, to implement your loops. The repeat start command specifies the beginning of you loops, as well the number of iterations you want, and the repeat end specifies the end of the loop.Try it out!");
+          setIsPopupOpen(true);
+        }
       }
     } catch (error) {
       console.log("Couldn't open the tutorial", error);
     }
   };
+
+  const handleClosePopup = () => {
+    setIsPopupOpen(false);
+  };
+
 
   const test_endpoint = async () => {
     try {
@@ -75,6 +93,14 @@ const App: React.FC = () => {
         </div>
         <div className="commands-container">
           <CommandPalette />
+        </div>
+        <div>
+          {isPopupOpen && (
+          <Popup
+            message={popupMessage}
+            onClose={handleClosePopup}
+          />
+        )}
         </div>
       </div>
     </>
