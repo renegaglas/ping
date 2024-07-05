@@ -67,7 +67,7 @@ const App: React.FC = () => {
     try {
       const responseProj = await axios.post(
         'http://localhost:8080/api/open/project',
-        { path: 'myMadafakinProject'},
+        { path: 'turtessine_project'},
         {
           headers: { 'Content-Type': 'application/json' }
         }
@@ -98,7 +98,7 @@ const App: React.FC = () => {
     try {
       const responseProj = await axios.post(
         'http://localhost:8080/api/open/project',
-        { path: 'myMadafakinProject'},
+        { path: 'turtessine_project'},
         {
           headers: { 'Content-Type': 'application/json' }
         }
