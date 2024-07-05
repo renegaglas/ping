@@ -72,12 +72,12 @@ const App: React.FC = () => {
           headers: { 'Content-Type': 'application/json' }
         }
       );
-      console.log("la puta respuesta: ", responseProj);
+      //console.log("la puta respuesta: ", responseProj);
       if (responseProj.data) {
-        console.log("el json de los cojones: " + responseProj.data);
-        console.log("abrir el proyecto: ", responseProj.data);
+        //console.log("el json de los cojones: " + responseProj.data);
+        console.log("open the project: ", responseProj.data);
       }
-      console.log("la request del save XD: ", request_content);
+      //console.log("la request del save XD: ", request_content);
       const response = await axios.post(
         'http://localhost:8080/api/save',
         //{ body: request_content },
@@ -105,7 +105,7 @@ const App: React.FC = () => {
       );
 
       if (responseProj.data) {
-        console.log("abrir el proyecto: ", responseProj.data);
+        console.log("open the project: ", responseProj.data);
       }
       const response = await axios.post(
         'http://localhost:8080/api/load',
@@ -188,10 +188,10 @@ const App: React.FC = () => {
       </div>
       <div className="app-container">
         <div className="canvas-container">
-          <Canvas 
-            commands={commands} 
-            isDrawing={isDrawing} 
-            toggleDrawing={toggleDrawing} 
+          <Canvas
+            commands={commands}
+            isDrawing={isDrawing}
+            toggleDrawing={toggleDrawing}
           />
         </div>
         <div className="code-container">

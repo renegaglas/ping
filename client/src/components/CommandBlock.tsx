@@ -21,12 +21,12 @@ const CommandBlock: React.FC<CommandBlockProps> = ({ name, icon }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseEnter = () => {
-    console.log("handleMouseEnter");
+    //console.log("handleMouseEnter");
     setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
-    console.log("handleMouseLeave");
+    //console.log("handleMouseLeave");
     setIsHovered(false);
   };
 
