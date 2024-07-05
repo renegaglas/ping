@@ -40,18 +40,6 @@ const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'b
 
 const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
 
-  useEffect(() => {
-    // This effect runs whenever `commands` changes
-    console.log("commands has been modified")
-  }, [commands]);
-
-
-  const onDrophat = (event: React.DragEvent<HTMLDivElement>,index:number) => {
-    console.log("onDrophat has been called and abort")
-    return;
-    onDrop(event, index);
-  }
-
   const onDrop = (event: React.DragEvent<HTMLDivElement>,index:number) => {
 
     console.log('on drop start');
@@ -88,7 +76,7 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     if (myColor === "undefined") {
       myColor = 'black';
     }
-    
+
     if (myAngle === "undefined") {
       myAngle = 0;
     }
@@ -102,7 +90,7 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     else {
       // we need to determine if myValue is a string or a number
       // it's purely a string only if it's a color
-      
+
       // if myValue is NOT in colors array (array of strings with all colors)
       if (colors.find((elt) => {return elt === myValue}) === undefined) {
         // myValue was not found in colors so it's not a color
@@ -119,7 +107,7 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     else {
       myClosed = false;
     }
-    
+
     const updatedCommands = [...commands];
     updatedCommands.splice(index, 0, { name: commandName, color: myColor, angle: myAngle, value: myValue, closed : myClosed });
 
@@ -183,12 +171,6 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     handleAngleChange(angle,index);
   };
 
-  const test = (id:string) => {
-    console.log("the function test " + id + " has been called");
-    console.log(commands);
-    console.log(commands.length);
-  };
-
   const onDragStart = (event: React.DragEvent<HTMLDivElement>,index:number,name:string, angle: number | undefined,
     closed:boolean | undefined, value:number | string | undefined, color:string | undefined) => {
 
@@ -229,12 +211,12 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseEnter = () => {
-    console.log("handleMouseEnter");
+    //console.log("handleMouseEnter");
     setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
-    console.log("handleMouseLeave");
+    //console.log("handleMouseLeave");
     setIsHovered(false);
   };
 
@@ -246,7 +228,7 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
   }
 
   return (
-    <div className="code-area" onDrop={(e) => onDrophat(e, commands.length)} onDragOver={onDragOver} >
+    <div className="code-area" onDragOver={onDragOver} >
       <button className="cleat button" onClick={() => setCommands([])}>Clear</button>
       <div className="code-area-content">
       <div className="arrow" onDrop={(e) => onDrop(e, 0)} onDragOver={onDragOver}>&#8595;</div>
