@@ -56,16 +56,20 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
         event.preventDefault();
         return;
       }
+    /*
     let val_tmp = 0;
     if (commandName === 'Repeat End') {
+      console.log("Dropped reapeat end");
       for (let i = commands.length - 1; i >= 0; i--) {
         if (commands[i].name === 'Repeat Start' && !commands[i].closed) {
+          console.log("Reapeat start dected at ", i);
           commands[i].closed = true;
           val_tmp = i;
           break;
         }
       }
     }
+    */
 
     // taking the rest of the attributes from the dragged command (if they exist)
     let myColor : string = event.dataTransfer.getData('color');
@@ -86,7 +90,7 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     }
 
     if (myValue === "undefined") {
-      myValue = val_tmp;
+      myValue = 0;
     }
     else {
       // we need to determine if myValue is a string or a number
