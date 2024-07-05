@@ -21,7 +21,8 @@
     {
         "index": 4,
         "name": "Color",
-        "value": "red"
+        "value": "red",
+        "color": "red"
     },
     {
         "index": 5,
