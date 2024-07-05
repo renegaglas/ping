@@ -6,6 +6,7 @@ interface Command {
   name: string;
   value?: number | string;
   closed?: boolean;
+  currRep: number;
 }
 
 interface CanvasProps {
@@ -35,7 +36,13 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
   const drawingcanvasRef = useRef<HTMLCanvasElement | null>(null);
   const [turtle, setTurtle] = useState<TurtleState>(initialTurtleState);
   const [start, setStart] = useState(0);
+  // currIndex represents the index in the commandsList of the command that must be
+  // executed next
+  // example: if currIndex === 0 then the next command to execute is commands[0], so
+  // it hasn't ended but it might have started
+  const [currIndex, setCurrIndex] = useState(0);
   const isPlayingRef = useRef(false);
+  //let start2 = start;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -64,17 +71,22 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
     drawingcontext: CanvasRenderingContext2D,
     currentTurtle: TurtleState
   ) => {
-    for (let i = start; i < commands.length; i++) {
+    for (let i = currIndex; i < commands.length; i++) {
+      console.log("Current iteration: ", i);
+      console.log("currIndex: ", currIndex);
       if (!isPlayingRef.current) {
         setStart(i);
         return null;
       }
 
       const command = commands[i];
+      //setCurrIndex(i);
+      console.log("curr command[i]: ", commands[i]);
 
+      console.log("Executing " + command.name);
       switch (command.name) {
         case 'Forward':
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 3 * 1000));
           clearTurtle(context, currentTurtle.x, currentTurtle.y);
           const distance = (command.value as number) || 0;
           const newX =
@@ -92,7 +104,7 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
           }
           currentTurtle.x = newX;
           currentTurtle.y = newY;
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 3 * 1000));
           drawTurtle(context, currentTurtle.x, currentTurtle.y, currentTurtle.angle);
           break;
         case 'Turtle':
@@ -102,21 +114,22 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
           currentTurtle.color = command.value as string;
           break;
         case 'Turn Right':
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 3 * 1000));
           clearTurtle(context, currentTurtle.x, currentTurtle.y);
           currentTurtle.angle = (currentTurtle.angle + (command.value as number)) % 360;
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 3 * 1000));
           drawTurtle(context, currentTurtle.x, currentTurtle.y, currentTurtle.angle);
           break;
         case 'Turn Left':
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 3 * 1000));
           clearTurtle(context, currentTurtle.x, currentTurtle.y);
           currentTurtle.angle =
             (currentTurtle.angle - (command.value as number) + 360) % 360;
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 3 * 1000));
           drawTurtle(context, currentTurtle.x, currentTurtle.y, currentTurtle.angle);
           break;
         case 'Repeat Start':
+          await new Promise((resolve) => setTimeout(resolve, 3 * 1000));
           let loop_instructions = [];
           for (let j = i + 1; j < commands.length; j++) {
             if (commands[j].name === 'Repeat End' && commands[j].value === command.index) {
@@ -124,7 +137,8 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
             }
             loop_instructions.push(commands[j]);
           }
-          for (let k = 0; k < (command.value as number) - 1; k++) {
+          for (; command.currRep < (command.value as number) - 1; command.currRep++) {
+            console.log("Repeating for the " + command.currRep + "th time");
             let tmp = await executeCommandsList(
               loop_instructions,
               context,
@@ -138,10 +152,19 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
             drawingcontext = tmp;
 
           }
+          command.currRep = 0;
+          break;
+        case 'Repeat End':
+          await new Promise((resolve) => setTimeout(resolve, 3 * 1000));
           break;
         default:
           break;
       }
+      console.log("Done executing");
+
+      console.log("currIndex before: ", currIndex);
+      setCurrIndex(i + 1);
+      console.log("currIndex after: ", currIndex);
     }
     return drawingcontext;
   };
@@ -151,8 +174,9 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
     const drawingcanvas = drawingcanvasRef.current;
     let context = canvas?.getContext('2d');
     let drawingcontext = drawingcanvas?.getContext('2d');
+    console.log("Play: currIndex: ", currIndex);
     if (context && drawingcontext) {
-      if (start === 0) {
+      if (currIndex === 0) {
         resetCanvas();
         drawTurtle(
           context,
@@ -162,7 +186,7 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
         );
       }
       let currentTurtle = { ...turtle };
-      isPlayingRef.current = true;
+      //isPlayingRef.current = true;
       let x = await executeCommandsList(
         commands,
         context,
@@ -173,8 +197,14 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
         {
           return;
         }
-      isPlayingRef.current = false;
-      setStart(0);
+      //isPlayingRef.current = false;
+      if (currIndex === commands.length) {
+        console.log("currIndex === commands.length, done");
+        setStart(0);
+        setCurrIndex(0);
+        //start2 = 0;
+        //console.log("start2 set to 0")
+      }
       setTurtle(currentTurtle);
     }
   };
@@ -200,8 +230,11 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
       <div className="control-panel">
         <button
           onClick={() => {
+            //console.log("start when playing:", start)
+            //console.log("start2 when playing:", start2)
             if (!isPlayingRef.current) {
               isPlayingRef.current = true;
+              console.log("before executing commands");
               executeCommands();
             }
           }}
@@ -210,6 +243,8 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
         </button>
         <button
           onClick={() => {
+            //console.log("start when pausing:", start)
+            //console.log("start2 when pausing:", start2)
             isPlayingRef.current = false;
           }}
         >
@@ -219,6 +254,14 @@ const Canvas: React.FC<CanvasProps> = ({ commands }) => {
           onClick={() => {
             isPlayingRef.current = false;
             setStart(0);
+            setCurrIndex(0);
+
+            // we set all currReps to 0
+            for (let i = 0; i < commands.length; i++) {
+              commands[i].currRep = 0;
+            }
+            //start2 = 0;
+            //console.log("start2 set to 0 because of stoping")
             resetCanvas();
           }}
         >

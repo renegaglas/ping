@@ -8,6 +8,7 @@ interface Command {
   color?: string;
   angle?: number;
   closed?: boolean;
+  currRep?: number;
 }
 
 interface CodeAreaProps {
@@ -109,7 +110,7 @@ const CodeArea: React.FC<CodeAreaProps> = ({ commands, setCommands }) => {
     }
 
     const updatedCommands = [...commands];
-    updatedCommands.splice(index, 0, { name: commandName, color: myColor, angle: myAngle, value: myValue, closed : myClosed });
+    updatedCommands.splice(index, 0, { name: commandName, color: myColor, angle: myAngle, value: myValue, closed : myClosed, currRep : 0 });
 
     const lastindex_tmp = event.dataTransfer.getData('index');
     if (lastindex_tmp)
