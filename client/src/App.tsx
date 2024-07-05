@@ -65,9 +65,23 @@ const App: React.FC = () => {
       commands: JSON.stringify(commands),
     }
     try {
+      const responseProj = await axios.post(
+        'http://localhost:8080/api/open/project',
+        { path: 'myMadafakinProject'},
+        {
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+      console.log("la puta respuesta: ", responseProj);
+      if (responseProj.data) {
+        console.log("el json de los cojones: " + responseProj.data);
+        console.log("abrir el proyecto: ", responseProj.data);
+      }
+      console.log("la request del save XD: ", request_content);
       const response = await axios.post(
         'http://localhost:8080/api/save',
-        { body: request_content },
+        //{ body: request_content },
+        request_content,
         {
           headers: { 'Content-Type': 'application/json' },
         }
@@ -82,15 +96,26 @@ const App: React.FC = () => {
 
   const handleLoadClick = async (input: string) => {
     try {
+      const responseProj = await axios.post(
+        'http://localhost:8080/api/open/project',
+        { path: 'myMadafakinProject'},
+        {
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+
+      if (responseProj.data) {
+        console.log("abrir el proyecto: ", responseProj.data);
+      }
       const response = await axios.post(
         'http://localhost:8080/api/load',
-        { branch: input },
+        { path: input },
         {
           headers: { 'Content-Type': 'application/json' },
         }
       );
       if (response.data) {
-        const commandsFromTutorial: Command[] = JSON.parse(response.data);
+        const commandsFromTutorial: Command[] = response.data;
         setCommands(commandsFromTutorial);
       }
     } catch (error) {
